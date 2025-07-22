@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>배너 관리</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        form { display: flex; flex-direction: column; max-width: 500px; gap: 10px; }
+        input { padding: 8px; }
+        button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        #message { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>배너 추가하기</h1>
+    <form id="banner-form">
+        <input type="text" id="link_url" placeholder="연결될 주소 (예: https://google.com)" required>
+        <input type="text" id="image_url" placeholder="이미지 경로 (예: images/ad1.jpg)" required>
+        <input type="text" id="alt_text" placeholder="이미지 설명 (예: 광고 배너 1)" required>
+        <button type="submit">배너 저장</button>
+    </form>
+    <div id="message"></div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

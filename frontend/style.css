@@ -1,0 +1,17 @@
+body {
+    background-color: #121212; /* 어두운 배경색 */
+    color: #FFFFFF; /* 흰색 글자 */
+    text-align: center; /* 모든 글자 가운데 정렬 */
+    margin-top: 50px; /* 위쪽 여백 */
+}
+.banner-grid {
+    display: grid; /* 격자(그리드) 형태로 정렬 */
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* 화면 크기에 맞춰 열 개수 자동 조절 */
+    gap: 15px; /* 배너 사이의 간격 */
+    padding: 20px; /* 화면 좌우 여백 */
+}
+
+.banner-grid img {
+    width: 100%; /* 이미지를 배너 칸에 꽉 채우기 */
+    display: block; /* 이미지 아래에 생기는 미세한 여백 제거 */
+}
