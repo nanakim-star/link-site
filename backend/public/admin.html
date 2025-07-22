@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <title>배너 관리</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        form { display: flex; flex-direction: column; max-width: 500px; gap: 10px; }
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+        form { display: flex; flex-direction: column; max-width: 500px; gap: 10px; margin-bottom: 40px;}
         input { padding: 8px; }
         button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
         #message { margin-top: 15px; font-weight: bold; }
+        #banner-list div { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ccc; }
+        #banner-list button { background-color: #dc3545; }
     </style>
 </head>
 <body>
@@ -21,6 +23,9 @@
     </form>
     <div id="message"></div>
 
+    <hr>
+    <h2>현재 배너 목록</h2>
+    <div id="banner-list"></div>
     <script src="admin.js"></script>
 </body>
 </html>

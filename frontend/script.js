@@ -1,5 +1,4 @@
-// '/api' 부분이 빠지지 않았는지 확인하세요.
-const apiUrl = 'https://symmetrical-fiesta-4jrjgrgvwpv3pjj-3001.app.github.dev/api/banners';
+const apiUrl = 'https://humble-space-guacamole-r4x4rx6rpw49cppjr-3001.app.github.dev/api/banners';
 
 const bannerGrid = document.querySelector('.banner-grid');
 

@@ -1,0 +1,11 @@
+{
+    "name": "Node.js Sample",
+    "image": "mcr.microsoft.com/devcontainers/javascript-node:0-18-bullseye",
+    "portsAttributes": {
+        "3001": {
+            "label": "Backend",
+            "onAutoForward": "notify",
+            "visibility": "public"
+        }
+    }
+}
