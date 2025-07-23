@@ -2,30 +2,49 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>배너 관리</title>
+    <title>통합 관리자</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-        form { display: flex; flex-direction: column; max-width: 500px; gap: 10px; margin-bottom: 40px;}
-        input { padding: 8px; }
-        button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-        #message { margin-top: 15px; font-weight: bold; }
-        #banner-list div { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ccc; }
-        #banner-list button { background-color: #dc3545; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f0f2f5; padding: 0; margin: 0; max-width: 1400px; margin: auto; }
+        h1, h2, h3 { text-align: center; color: #333; }
+        button, input[type="submit"] { cursor: pointer; font-size: 14px; }
+        hr { border: 0; height: 1px; background: #ddd; margin: 40px 0; }
+        
+        .top-bar { padding: 10px 30px; background-color: #343a40; color: white; text-align: right; margin-bottom: 20px; }
+        .top-bar a { color: #f8f9fa; text-decoration: none; margin-left: 15px; }
+        .view-container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .hidden { display: none; }
+        .form-container { display: flex; flex-direction: column; max-width: 500px; gap: 15px; margin: 40px auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .site-list .site-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .back-to-sites { margin-bottom: 20px; background: none; border: 1px solid #ccc; padding: 8px 15px; border-radius: 4px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+        .modal-content { background-color: #fff; border-radius: 8px; width: 90%; max-width: 700px; padding: 30px; position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>배너 추가하기</h1>
-    <form id="banner-form">
-        <input type="text" id="link_url" placeholder="연결될 주소 (예: https://google.com)" required>
-        <input type="text" id="image_url" placeholder="이미지 경로 (예: images/ad1.jpg)" required>
-        <input type="text" id="alt_text" placeholder="이미지 설명 (예: 광고 배너 1)" required>
-        <button type="submit">배너 저장</button>
-    </form>
-    <div id="message"></div>
+    <div class="top-bar"><span>관리자님 환영합니다.</span><a href="/logout">로그아웃</a></div>
 
-    <hr>
-    <h2>현재 배너 목록</h2>
-    <div id="banner-list"></div>
+    <div id="site-management-view" class="view-container">
+        <h1>사이트 관리자</h1>
+        <form id="site-form" class="form-container">
+            <h2>새 사이트 추가</h2>
+            <input type="text" id="site-name" placeholder="사이트 이름" required>
+            <input type="text" id="site-domain" placeholder="사이트 도메인 (선택 사항)">
+            <input type="text" id="telegram-link" placeholder="텔레그램 링크">
+            <div style="display: flex; align-items: center; gap: 10px;"><label for="theme-color">테마 색상:</label><input type="color" id="theme-color" value="#121212"></div>
+            <button type="submit">사이트 추가</button>
+        </form>
+        <hr>
+        <div id="site-list" class="site-list"></div>
+    </div>
+
+    <div id="banner-management-view" class="view-container hidden"></div>
+    <div id="link-management-view" class="view-container hidden"></div>
+
+    <div id="site-edit-modal" class="modal"></div>
+    <div id="edit-modal" class="modal"></div>
+    <div id="link-items-modal" class="modal"></div>
+
     <script src="admin.js"></script>
 </body>
 </html>

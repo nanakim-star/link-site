@@ -1,17 +1,133 @@
 body {
-    background-color: #121212; /* 어두운 배경색 */
-    color: #FFFFFF; /* 흰색 글자 */
-    text-align: center; /* 모든 글자 가운데 정렬 */
-    margin-top: 50px; /* 위쪽 여백 */
+    background-color: #f0f2f5;
+    color: #333;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding-bottom: 50px;
 }
+
 .banner-grid {
-    display: grid; /* 격자(그리드) 형태로 정렬 */
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* 화면 크기에 맞춰 열 개수 자동 조절 */
-    gap: 15px; /* 배너 사이의 간격 */
-    padding: 20px; /* 화면 좌우 여백 */
+    max-width: 1400px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px;
 }
 
 .banner-grid img {
-    width: 100%; /* 이미지를 배너 칸에 꽉 채우기 */
-    display: block; /* 이미지 아래에 생기는 미세한 여백 제거 */
+    width: 100%;
+    display: block;
+    border-radius: 4px;
+}
+
+#link-lists-container {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.link-group {
+    background-color: #fff;
+    border: 1px solid #e9e9e9;
+    border-radius: 4px;
+    padding: 0;
+    text-align: left;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.link-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.link-group-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.link-group-header .arrow {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ccc;
+}
+
+.link-group ol {
+    list-style: none;
+    padding: 10px 15px;
+    margin: 0;
+    counter-reset: rank-counter; /* 순위 카운터 초기화 */
+}
+
+.link-group li {
+    padding: 9px 0;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 500;
+    counter-increment: rank-counter; /* 순위 카운터 증가 */
+}
+
+/* 순위 아이콘 공통 스타일 */
+.link-group li::before {
+    content: counter(rank-counter);
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    color: #888;
+    font-weight: bold;
+    font-size: 12px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 1,2,3위는 메달 이미지로 변경 */
+.link-group li.rank-1::before, .link-group li.rank-2::before, .link-group li.rank-3::before {
+    content: '';
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+}
+.link-group li.rank-1::before { background-image: url('https://i.ibb.co/37W462h/gold-medal.png'); }
+.link-group li.rank-2::before { background-image: url('https://i.ibb.co/GPC4xJ3/silver-medal.png'); }
+.link-group li.rank-3::before { background-image: url('https://i.ibb.co/v3p6x23/bronze-medal.png'); }
+
+/* 순위별 글자 색상 */
+.link-group li.rank-1 a { color: #ef4b56; }
+.link-group li.rank-2 a { color: #3b9a3e; }
+.link-group li.rank-3 a { color: #4a68d9; }
+
+
+.link-group a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.link-group a:hover {
+    text-decoration: underline;
+}
+
+.link-group-footer {
+    text-align: right;
+    padding: 10px 15px;
+    font-size: 13px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.link-group-footer a {
+    color: #888;
+    text-decoration: none;
 }
