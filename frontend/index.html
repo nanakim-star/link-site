@@ -7,10 +7,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="banner-grid"></div>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1 id="site-title">로딩중...</h1>
+            </div>
+            <div class="header-right">
+                <div id="clock">00:00:00</div>
+                <div id="date">2025년 7월 25일 (금)</div>
+            </div>
+        </header>
+        <nav>
+            <a href="#">공지사항</a>
+            <a id="telegram-link" href="#" target="_blank">광고/제휴문의</a>
+        </nav>
 
-    <div id="link-lists-container"></div>
-
+        <main>
+            <div class="banner-grid"></div>
+            <div id="link-lists-container"></div>
+        </main>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

@@ -13,14 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const siteListDiv = document.getElementById('site-list');
     const siteForm = document.getElementById('site-form');
     const siteEditModal = document.getElementById('site-edit-modal');
-    const siteEditForm = document.getElementById('site-edit-form');
-    const closeSiteEditModalBtn = document.getElementById('close-site-edit-modal');
-
+    
     // --- 사이트 관리 기능 ---
     async function loadSites() {
-        siteListDiv.innerHTML = '로딩 중...';
+        siteListDiv.innerHTML = '<h2>사이트 목록</h2><p>로딩 중...</p>';
         try {
             const response = await fetch('/api/admin/sites');
+            if (!response.ok) throw new Error('서버 응답 오류');
             const sites = await response.json();
             siteListDiv.innerHTML = '<h2>사이트 목록</h2>';
             if (sites.length === 0) {
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 siteListDiv.appendChild(siteItem);
             });
         } catch (error) {
-            siteListDiv.innerHTML = '<p style="color: red;">사이트 목록 로딩 실패</p>';
+            siteListDiv.innerHTML = '<h2>사이트 목록</h2><p style="color: red;">사이트 목록 로딩 실패</p>';
         }
     }
 
@@ -53,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const siteData = {
             site_name: document.getElementById('site-name').value,
             site_domain: document.getElementById('site-domain').value,
+            telegram_link: document.getElementById('telegram-link').value,
             theme_color: document.getElementById('theme-color').value,
         };
         await fetch('/api/admin/sites', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(siteData) });
@@ -69,42 +69,46 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/admin/sites');
             const sites = await res.json();
             const currentSite = sites.find(s => s.id == siteId);
-            document.getElementById('edit-site-id').value = currentSite.id;
-            document.getElementById('edit-site-name').value = currentSite.site_name;
-            document.getElementById('edit-site-domain').value = currentSite.site_domain;
-            document.getElementById('edit-theme-color').value = currentSite.theme_color;
+            
+            siteEditModal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-btn">&times;</span><h2>사이트 수정</h2>
+                    <form id="site-edit-form-actual" class="modal-form">
+                        <input type="hidden" id="edit-site-id" value="${currentSite.id}">
+                        <div class="form-group"><label>사이트 이름:</label><input type="text" id="edit-site-name" value="${currentSite.site_name}" required></div>
+                        <div class="form-group"><label>사이트 도메인:</label><input type="text" id="edit-site-domain" value="${currentSite.site_domain || ''}"></div>
+                        <div class="form-group"><label>텔레그램 링크:</label><input type="text" id="edit-telegram-link" value="${currentSite.telegram_link || ''}"></div>
+                        <div class="form-group"><label>테마 색상:</label><input type="color" id="edit-theme-color" value="${currentSite.theme_color}"></div>
+                        <button type="submit" class="save-btn">수정 완료</button>
+                    </form>
+                </div>
+            `;
             siteEditModal.style.display = 'flex';
+            
+            siteEditModal.querySelector('.close-btn').addEventListener('click', () => { siteEditModal.style.display = 'none'; });
+            siteEditModal.querySelector('#site-edit-form-actual').addEventListener('submit', async (submitEvent) => {
+                submitEvent.preventDefault();
+                const updatedData = {
+                    site_name: document.getElementById('edit-site-name').value,
+                    site_domain: document.getElementById('edit-site-domain').value,
+                    telegram_link: document.getElementById('edit-telegram-link').value,
+                    theme_color: document.getElementById('edit-theme-color').value,
+                };
+                await fetch(`/api/admin/sites/${siteId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedData) });
+                siteEditModal.style.display = 'none';
+                loadSites();
+            });
         }
-    });
-
-    siteEditForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const siteId = document.getElementById('edit-site-id').value;
-        const siteData = {
-            site_name: document.getElementById('edit-site-name').value,
-            site_domain: document.getElementById('edit-site-domain').value,
-            theme_color: document.getElementById('edit-theme-color').value
-        };
-        await fetch(`/api/admin/sites/${siteId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(siteData) });
-        siteEditModal.style.display = 'none';
-        loadSites();
     });
     // --- 배너 관리 기능 ---
     const bannerViewTitle = document.getElementById('banner-view-title');
     const bannerGrid = document.getElementById('banner-grid');
     const bannerModal = document.getElementById('edit-modal');
-    const bannerForm = document.getElementById('banner-form');
-    const bannerModalTitle = document.getElementById('modal-title');
-    const slotIdInput = document.getElementById('slot-id-input');
-    const linkUrlInput = document.getElementById('link-url-input');
-    const altTextInput = document.getElementById('alt-text-input');
-    const imageFileInput = document.getElementById('image-file-input');
-    const closeModalBtn = document.getElementById('close-modal');
     const placeholderImage = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22375%22%20height%3D%22100%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20375%20100%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text/css%22%3E%23holder%20text%20%7B%20fill%3A%23AAAAAA%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A19pt%20%7D%20%3C/style%3E%3C/defs%3E%3Cg%3E%3Crect%20width%3D%22375%22%20height%3D%22100%22%20fill%3D%22%23EEEEEE%22%3E%3C/rect%3E%3Cg%3E%3Ctext%20x%3D%22123.5%22%20y%3D%2258.6%22%3E%EB%B0%B0%EB%84%88%20%EC%A4%80%EB%B9%84%EC%A4%91%3C/text%3E%3C/g%3E%3C/g%3E%3C/svg%3E';
 
     async function loadBanners() {
         if (!currentSiteId) return;
-        bannerGrid.innerHTML = '로딩 중...';
+        bannerGrid.innerHTML = '<p>로딩 중...</p>';
         try {
             const response = await fetch(`/api/admin/sites/${currentSiteId}/banners`);
             if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`);
@@ -139,8 +143,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openBannerModal(slotId, isEditing = false, bannerData = {}) {
-        bannerForm.reset();
-        slotIdInput.value = slotId;
+        bannerModal.innerHTML = `
+            <div class="modal-content">
+                <span class="close-btn">&times;</span><h2 id="modal-title-banner"></h2>
+                <form id="banner-form-actual" class="modal-form">
+                    <input type="hidden" id="slot-id-input" value="${slotId}">
+                    <div class="form-group"><label>연결 주소:</label><input type="text" id="link-url-input" required></div>
+                    <div class="form-group"><label>이미지 설명:</label><input type="text" id="alt-text-input" required></div>
+                    <div class="form-group"><label>배너 이미지:</label><input type="file" id="image-file-input" accept="image/*"></div>
+                    <button type="submit" class="save-btn">저장하기</button>
+                </form>
+            </div>
+        `;
+        
+        const bannerModalTitle = bannerModal.querySelector('#modal-title-banner');
+        const linkUrlInput = bannerModal.querySelector('#link-url-input');
+        const altTextInput = bannerModal.querySelector('#alt-text-input');
+        const imageFileInput = bannerModal.querySelector('#image-file-input');
+
         if (isEditing) {
             bannerModalTitle.textContent = `슬롯 #${slotId} 수정`;
             linkUrlInput.value = bannerData.link_url;
@@ -151,6 +171,20 @@ document.addEventListener('DOMContentLoaded', () => {
             imageFileInput.required = true;
         }
         bannerModal.style.display = 'flex';
+
+        bannerModal.querySelector('#banner-form-actual').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('link_url', linkUrlInput.value);
+            formData.append('alt_text', altTextInput.value);
+            if (imageFileInput.files[0]) {
+                formData.append('bannerImage', imageFileInput.files[0]);
+            }
+            await fetch(`/api/admin/sites/${currentSiteId}/banners/${slotId}`, { method: 'POST', body: formData });
+            bannerModal.style.display = 'none';
+            loadBanners();
+        });
+        bannerModal.querySelector('.close-btn').addEventListener('click', () => { bannerModal.style.display = 'none'; });
     }
 
     bannerGrid.addEventListener('click', async (e) => {
@@ -170,23 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-    
-    bannerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const slotId = document.getElementById('slot-id-input').value;
-        const formData = new FormData();
-        formData.append('link_url', linkUrlInput.value);
-        formData.append('alt_text', altTextInput.value);
-        if (imageFileInput.files[0]) {
-            formData.append('bannerImage', imageFileInput.files[0]);
-        }
-        await fetch(`/api/admin/sites/${currentSiteId}/banners/${slotId}`, {
-            method: 'POST',
-            body: formData,
-        });
-        bannerModal.style.display = 'none';
-        loadBanners();
-    });
     // --- 링크 목록 관리 ---
     const linkViewTitle = document.getElementById('link-view-title');
     const linkGroupsContainer = document.getElementById('link-groups-container');
@@ -200,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadLinkGroups() {
         if (!currentSiteId) return;
-        linkGroupsContainer.innerHTML = '로딩 중...';
+        linkGroupsContainer.innerHTML = '<p>로딩 중...</p>';
         try {
             const response = await fetch(`/api/admin/sites/${currentSiteId}/link_groups`);
             const groups = await response.json();
@@ -211,6 +228,17 @@ document.addEventListener('DOMContentLoaded', () => {
             groups.forEach(group => {
                 const groupEl = document.createElement('div');
                 groupEl.className = 'link-group';
+                
+                let itemsHtml = '<ol style="list-style:none; padding:0; margin-top:15px;">';
+                if (group.items && group.items.length > 0) {
+                    group.items.forEach(item => {
+                        itemsHtml += `<li style="padding: 2px 0;">${item.rank}. ${item.name}</li>`;
+                    });
+                } else {
+                    itemsHtml += '<li style="color:#888;">등록된 항목이 없습니다.</li>';
+                }
+                itemsHtml += '</ol>';
+
                 groupEl.innerHTML = `
                     <div class="link-group-header">
                         <h3>${group.title}</h3>
@@ -219,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="delete-group-btn" data-group-id="${group.id}">그룹 삭제</button>
                         </div>
                     </div>
+                    ${itemsHtml}
                 `;
                 linkGroupsContainer.appendChild(groupEl);
             });
@@ -280,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({ items })
         });
         linkItemsModal.style.display = 'none';
+        loadLinkGroups();
     });
     // --- 화면 전환 및 초기화 ---
     function showSiteListView() {
@@ -312,8 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 모달 닫기 로직
-    closeModalBtn.onclick = () => { bannerModal.style.display = 'none'; };
-    closeSiteEditModalBtn.onclick = () => { siteEditModal.style.display = 'none'; };
     closeLinkModalBtn.onclick = () => { linkItemsModal.style.display = 'none'; };
 
     window.onclick = (e) => {

@@ -11,14 +11,41 @@
         
         .top-bar { padding: 10px 30px; background-color: #343a40; color: white; text-align: right; margin-bottom: 20px; }
         .top-bar a { color: #f8f9fa; text-decoration: none; margin-left: 15px; }
+
         .view-container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .hidden { display: none; }
+
         .form-container { display: flex; flex-direction: column; max-width: 500px; gap: 15px; margin: 40px auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
         .site-list .site-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
         .back-to-sites { margin-bottom: 20px; background: none; border: 1px solid #ccc; padding: 8px 15px; border-radius: 4px; }
+        
+        .manage-links-btn { background-color: #ffc107; color: black; border: none; padding: 8px 15px; border-radius: 4px; margin-right: 5px; }
+        .manage-banners-btn { background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; }
+        .edit-site-btn { background-color: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 4px; margin-right: 5px;}
+
+        #banner-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .slot { border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fafafa; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .slot img { width: 100%; height: 100px; object-fit: contain; background-color: #eee; margin-bottom: 10px; border-radius: 4px; }
+        .slot-info { font-size: 14px; margin-bottom: 10px; color: #555; word-break: break-all; }
+        .slot-actions { display: flex; justify-content: space-around; gap: 5px; margin-top: 10px; }
+        .slot-actions button { width: auto; padding: 5px 10px; flex-grow: 1; color: white; border: none; border-radius: 4px; }
+        .edit-btn { background-color: #28a745; }
+        .delete-btn { background-color: #dc3545; }
+        .register-btn { background-color: #17a2b8; }
+
+        #link-management-view #link-groups-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+        .link-group { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 0; padding: 20px; background-color: #fafafa; }
+        .link-group-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #eee; margin-bottom: 15px; }
+        .link-group-header h3 { margin: 0; text-align: left; }
+
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
         .modal-content { background-color: #fff; border-radius: 8px; width: 90%; max-width: 700px; padding: 30px; position: relative; }
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
+        .modal-form { display: flex; flex-direction: column; gap: 10px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { text-align: left; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { padding: 8px; }
+        .link-item-form { display: grid; grid-template-columns: 50px 1fr 2fr; gap: 10px; align-items: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -31,19 +58,69 @@
             <input type="text" id="site-name" placeholder="사이트 이름" required>
             <input type="text" id="site-domain" placeholder="사이트 도메인 (선택 사항)">
             <input type="text" id="telegram-link" placeholder="텔레그램 링크">
-            <div style="display: flex; align-items: center; gap: 10px;"><label for="theme-color">테마 색상:</label><input type="color" id="theme-color" value="#121212"></div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="theme-color">테마 색상:</label>
+                <input type="color" id="theme-color" value="#121212">
+            </div>
             <button type="submit">사이트 추가</button>
         </form>
         <hr>
         <div id="site-list" class="site-list"></div>
     </div>
 
-    <div id="banner-management-view" class="view-container hidden"></div>
-    <div id="link-management-view" class="view-container hidden"></div>
+    <div id="banner-management-view" class="view-container hidden">
+        <button class="back-to-sites">← 사이트 목록으로 돌아가기</button>
+        <h1 id="banner-view-title"></h1>
+        <div id="banner-grid"></div>
+    </div>
 
-    <div id="site-edit-modal" class="modal"></div>
-    <div id="edit-modal" class="modal"></div>
-    <div id="link-items-modal" class="modal"></div>
+    <div id="link-management-view" class="view-container hidden">
+        <button class="back-to-sites">← 사이트 목록으로 돌아가기</button>
+        <h1 id="link-view-title"></h1>
+        <form id="new-group-form" class="form-container">
+            <h3>새 목록 그룹 추가</h3>
+            <input type="text" id="new-group-title" placeholder="그룹 제목 (예: 웹툰 Top10)" required>
+            <button type="submit">그룹 추가</button>
+        </form>
+        <hr>
+        <div id="link-groups-container"></div>
+    </div>
+
+    <div id="site-edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span><h2>사이트 수정</h2>
+            <form id="site-edit-form-actual" class="modal-form">
+                <input type="hidden" id="edit-site-id">
+                <div class="form-group"><label>사이트 이름:</label><input type="text" id="edit-site-name" required></div>
+                <div class="form-group"><label>사이트 도메인:</label><input type="text" id="edit-site-domain"></div>
+                <div class="form-group"><label>텔레그램 링크:</label><input type="text" id="edit-telegram-link"></div>
+                <div class="form-group"><label>테마 색상:</label><input type="color" id="edit-theme-color"></div>
+                <button type="submit" class="save-btn">수정 완료</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span><h2 id="modal-title-banner"></h2>
+            <form id="banner-form-actual" class="modal-form">
+                <input type="hidden" id="slot-id-input">
+                <div class="form-group"><label>연결 주소:</label><input type="text" id="link-url-input" required></div>
+                <div class="form-group"><label>이미지 설명:</label><input type="text" id="alt-text-input" required></div>
+                <div class="form-group"><label>배너 이미지:</label><input type="file" id="image-file-input" accept="image/*"></div>
+                <button type="submit" class="save-btn">저장하기</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="link-items-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-link-modal">&times;</span>
+            <h2 id="link-modal-title"></h2>
+            <form id="link-items-form"></form>
+            <button id="save-link-items-btn" style="margin-top: 20px; padding: 10px; width: 100%;">저장하기</button>
+        </div>
+    </div>
 
     <script src="admin.js"></script>
 </body>
