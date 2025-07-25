@@ -66,13 +66,15 @@ function renderBanners(banners) {
 }
 
 // 링크 목록 렌더링
-function renderLinkLists(groups) {
+function renderLinkLists(groups, siteId) {
     linkListsContainer.innerHTML = '';
     for(let i = 0; i < 10; i++) {
         const group = groups[i];
         const listEl = document.createElement('div');
         listEl.className = 'link-group';
+
         if (group) {
+            const detailPageUrl = `group.html?site=${siteId}&group=${group.id}`;
             let itemsHtml = '<ol>';
             group.items.forEach(item => {
                 let targetUrl = item.url;
@@ -80,10 +82,16 @@ function renderLinkLists(groups) {
                 itemsHtml += `<li class="rank-${item.rank}"><a href="${targetUrl}" target="_blank">${item.name}</a></li>`;
             });
             itemsHtml += '</ol>';
+
             listEl.innerHTML = `
-                <a href="#" class="link-group-header"><h3>${group.title}</h3><span class="arrow">&gt;</span></a>
+                <a href="${detailPageUrl}" class="link-group-header">
+                    <h3>${group.title}</h3>
+                    <span class="arrow">&gt;</span>
+                </a>
                 ${itemsHtml}
-                <div class="link-group-footer"><a href="#">... 더보기</a></div>
+                <div class="link-group-footer">
+                    <a href="${detailPageUrl}">... 더보기</a>
+                </div>
             `;
         } else {
             listEl.innerHTML = `<div class="link-group-header"><h3>목록 준비중</h3></div><ol style="height: 325px;"></ol>`;
@@ -92,23 +100,22 @@ function renderLinkLists(groups) {
     }
 }
 
-// 서버에서 모든 데이터 가져오기 (수정됨)
+// 서버에서 모든 데이터 가져오기
 async function fetchData(siteId) {
     try {
-        // 1. 배너 정보 먼저 가져오기
-        const bannerResponse = await fetch(`${backendUrl}/api/public/sites/${siteId}/banners`);
-        if (!bannerResponse.ok) throw new Error('배너 정보 로딩 실패');
-        const bannerData = await bannerResponse.json();
+        const bannerPromise = fetch(`${backendUrl}/api/public/sites/${siteId}/banners`);
+        const linksPromise = fetch(`${backendUrl}/api/public/sites/${siteId}/link_lists`);
         
-        // 2. 링크 목록 정보 가져오기
-        const linksResponse = await fetch(`${backendUrl}/api/public/sites/${siteId}/link_lists`);
-        if (!linksResponse.ok) throw new Error('링크 목록 로딩 실패');
+        const [bannerResponse, linksResponse] = await Promise.all([bannerPromise, linksPromise]);
+        
+        if (!bannerResponse.ok || !linksResponse.ok) throw new Error('서버 응답 오류');
+        
+        const bannerData = await bannerResponse.json();
         const linkGroups = await linksResponse.json();
         
-        // 3. 모든 정보가 성공적으로 온 뒤에 화면에 그리기
         renderSiteInfo(bannerData.site);
         renderBanners(bannerData.banners);
-        renderLinkLists(linkGroups);
+        renderLinkLists(linkGroups, siteId);
 
     } catch (error) {
         console.error('데이터를 가져오는 데 실패했습니다:', error);
