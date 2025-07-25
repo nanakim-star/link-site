@@ -49,7 +49,7 @@ adminApiRouter.use(checkAuth);
 // 사이트 관리
 adminApiRouter.get('/sites', async (req, res) => { try { const result = await pool.query('SELECT * FROM sites ORDER BY id ASC'); res.json(result.rows); } catch (e) { res.status(500).json({error: e.message}); } });
 adminApiRouter.post('/sites', async (req, res) => { try { const { site_name, site_domain, theme_color, telegram_link, title_font } = req.body; const result = await pool.query('INSERT INTO sites (site_name, site_domain, theme_color, telegram_link, title_font) VALUES ($1, $2, $3, $4, $5) RETURNING *', [site_name, site_domain, theme_color, telegram_link, title_font]); res.status(201).json(result.rows[0]); } catch (e) { res.status(500).json({error: e.message}); } });
-adminApiRouter.put('/sites/:id', async (req, res) => { try { const { id } = req.params; const { site_name, site_domain, theme_color, telegram_link, title_font } = req.body; const result = await pool.query('UPDATE sites SET site_name = $1, site_domain = $2, theme_color = $3, telegram_link = $4, title_font = $5 WHERE id = $6 RETURNING *', [site_name, site_domain, theme_color, telegram_link, title_font, id]); res.status(200).json(result.rows[0]); } catch (e) { res.status(500).json({ error: e.message, details: e.stack }); } });
+adminApiRouter.put('/sites/:id', async (req, res) => { try { const { id } = req.params; const { site_name, site_domain, theme_color, telegram_link, title_font } = req.body; const result = await pool.query('UPDATE sites SET site_name = $1, site_domain = $2, theme_color = $3, telegram_link = $4, title_font = $5 WHERE id = $6 RETURNING *', [site_name, site_domain, theme_color, telegram_link, title_font, id]); res.status(200).json(result.rows[0]); } catch (e) { res.status(500).json({ error: '서버 오류' }); } });
 
 // 배너 관리
 adminApiRouter.get('/sites/:siteId/banners', async (req, res) => { try { const { siteId } = req.params; const result = await pool.query('SELECT * FROM link_site_banners WHERE site_id = $1', [siteId]); const banners = Array(20).fill(null); result.rows.forEach(row => { banners[row.slot_id - 1] = row; }); res.json(banners); } catch (e) { res.status(500).json({error: e.message}); } });
@@ -71,6 +71,10 @@ app.get('/api/public/link_groups/:groupId', async (req, res) => { try { const { 
 app.listen(port, async () => {
     console.log(`서버가 http://localhost:${port} 에서 실행 중입니다.`);
     try {
+        // DB 스키마가 안정되었으므로, 서버 재시작 시 데이터가 유지되도록 DROP TABLE 구문은 주석 처리합니다.
+        // 나중에 테이블 구조를 변경하고 싶다면, 이 주석을 풀고 서버를 재시작하여 DB를 초기화하세요.
+         //await pool.query('DROP TABLE IF EXISTS link_items, link_groups, link_site_banners, sites CASCADE;');
+        
         await pool.query(`
           CREATE TABLE IF NOT EXISTS sites (
             id SERIAL PRIMARY KEY,

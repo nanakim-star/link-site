@@ -5,16 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Link Group</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header>
-            <a href="#" id="back-link" style="font-size: 24px; text-decoration: none; color: #333;">←</a>
-            <h1 id="group-title">로딩중...</h1>
-            <div></div> </header>
+            <h1 id="site-title">로딩중...</h1>
+            <div class="header-right">
+                <div id="clock">00:00:00</div>
+                <div id="date"></div>
+            </div>
+        </header>
+
+        <nav>
+            <a id="back-link" href="#">← 뒤로가기</a>
+            <a id="telegram-link" href="#" target="_blank">광고/제휴문의</a>
+        </nav>
 
         <main>
-            <div id="item-list-container"></div>
+            <h2 id="group-title" style="text-align: center; margin: 40px 0; font-size: 2.5em;"></h2>
+            
+            <div id="item-grid-container" class="banner-grid"></div>
         </main>
     </div>
     <script src="group.js"></script>

@@ -1,5 +1,5 @@
 // Codespaces의 3001 포트에 해당하는 공개 주소를 여기에 입력해야 합니다.
-const backendUrl = 'https://refactored-dollop-r7g4vxgppv7h56gv-3001.app.github.dev';
+const backendUrl = 'https://solid-guacamole-jjgj4g74q994cpgvw-3001.app.github.dev';
 
 // --- 페이지 요소 ---
 const siteTitleElement = document.getElementById('site-title');

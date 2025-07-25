@@ -188,3 +188,37 @@ main {
     color: #888;
     text-decoration: none;
 }
+
+/* 파일 맨 아래에 이어서 추가 */
+
+#group-items-grid {
+    grid-template-columns: repeat(5, 1fr); /* 하위 배너는 5열로 표시 */
+}
+
+.slot-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+    text-align: center;
+}
+
+.slot-item a {
+    text-decoration: none;
+    color: #333;
+}
+
+.slot-item img {
+    width: 100%;
+    height: 100px;
+    object-fit: contain;
+    background-color: #eee;
+    display: block;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.slot-item span {
+    display: block;
+    padding: 10px;
+    font-weight: 500;
+}
