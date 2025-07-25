@@ -1,5 +1,5 @@
 // Codespaces의 3001 포트에 해당하는 공개 주소를 여기에 입력해야 합니다.
-const backendUrl = 'https://YOUR_CODESPACE_URL-3001.app.github.dev';
+const backendUrl = 'https://refactored-dollop-r7g4vxgppv7h56gv-3001.app.github.dev';
 
 // --- 페이지 요소 ---
 const siteTitleElement = document.getElementById('site-title');
@@ -31,9 +31,14 @@ function updateTime() {
 function renderSiteInfo(site) {
     document.title = site.site_name;
     siteTitleElement.textContent = site.site_name;
-    // document.body.style.backgroundColor = site.theme_color; // 테마 색상 적용
+    siteTitleElement.style.fontFamily = site.title_font;
+    document.body.style.backgroundColor = site.theme_color;
     if (site.telegram_link) {
-        telegramLinkElement.href = site.telegram_link;
+        let targetUrl = site.telegram_link;
+        if (targetUrl && !targetUrl.startsWith('http')) {
+            targetUrl = 'https://' + targetUrl;
+        }
+        telegramLinkElement.href = targetUrl;
     }
 }
 
@@ -87,19 +92,20 @@ function renderLinkLists(groups) {
     }
 }
 
-// 서버에서 모든 데이터 가져오기
+// 서버에서 모든 데이터 가져오기 (수정됨)
 async function fetchData(siteId) {
     try {
-        const bannerPromise = fetch(`${backendUrl}/api/public/sites/${siteId}/banners`);
-        const linksPromise = fetch(`${backendUrl}/api/public/sites/${siteId}/link_lists`);
-        
-        const [bannerResponse, linksResponse] = await Promise.all([bannerPromise, linksPromise]);
-        
-        if (!bannerResponse.ok || !linksResponse.ok) throw new Error('서버 응답 오류');
-        
+        // 1. 배너 정보 먼저 가져오기
+        const bannerResponse = await fetch(`${backendUrl}/api/public/sites/${siteId}/banners`);
+        if (!bannerResponse.ok) throw new Error('배너 정보 로딩 실패');
         const bannerData = await bannerResponse.json();
+        
+        // 2. 링크 목록 정보 가져오기
+        const linksResponse = await fetch(`${backendUrl}/api/public/sites/${siteId}/link_lists`);
+        if (!linksResponse.ok) throw new Error('링크 목록 로딩 실패');
         const linkGroups = await linksResponse.json();
         
+        // 3. 모든 정보가 성공적으로 온 뒤에 화면에 그리기
         renderSiteInfo(bannerData.site);
         renderBanners(bannerData.banners);
         renderLinkLists(linkGroups);

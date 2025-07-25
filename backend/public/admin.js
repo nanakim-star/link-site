@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             site_domain: document.getElementById('site-domain').value,
             telegram_link: document.getElementById('telegram-link').value,
             theme_color: document.getElementById('theme-color').value,
+            title_font: document.getElementById('title-font').value
         };
         await fetch('/api/admin/sites', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(siteData) });
         siteForm.reset();
@@ -79,10 +80,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="form-group"><label>사이트 도메인:</label><input type="text" id="edit-site-domain" value="${currentSite.site_domain || ''}"></div>
                         <div class="form-group"><label>텔레그램 링크:</label><input type="text" id="edit-telegram-link" value="${currentSite.telegram_link || ''}"></div>
                         <div class="form-group"><label>테마 색상:</label><input type="color" id="edit-theme-color" value="${currentSite.theme_color}"></div>
+                        <div class="form-group">
+                            <label>사이트 제목 폰트:</label>
+                            <select id="edit-title-font">
+                                <option value="'Noto Sans KR', sans-serif">Noto Sans KR (고딕)</option>
+                                <option value="'Nanum Pen Script', cursive">Nanum Pen Script (손글씨)</option>
+                                <option value="'Black Han Sans', sans-serif">Black Han Sans (굵은)</option>
+                            </select>
+                        </div>
                         <button type="submit" class="save-btn">수정 완료</button>
                     </form>
                 </div>
             `;
+            document.getElementById('edit-title-font').value = currentSite.title_font;
             siteEditModal.style.display = 'flex';
             
             siteEditModal.querySelector('.close-btn').addEventListener('click', () => { siteEditModal.style.display = 'none'; });
@@ -93,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     site_domain: document.getElementById('edit-site-domain').value,
                     telegram_link: document.getElementById('edit-telegram-link').value,
                     theme_color: document.getElementById('edit-theme-color').value,
+                    title_font: document.getElementById('edit-title-font').value
                 };
                 await fetch(`/api/admin/sites/${siteId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedData) });
                 siteEditModal.style.display = 'none';
@@ -228,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
             groups.forEach(group => {
                 const groupEl = document.createElement('div');
                 groupEl.className = 'link-group';
-                
                 let itemsHtml = '<ol style="list-style:none; padding:0; margin-top:15px;">';
                 if (group.items && group.items.length > 0) {
                     group.items.forEach(item => {
@@ -238,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     itemsHtml += '<li style="color:#888;">등록된 항목이 없습니다.</li>';
                 }
                 itemsHtml += '</ol>';
-
                 groupEl.innerHTML = `
                     <div class="link-group-header">
                         <h3>${group.title}</h3>

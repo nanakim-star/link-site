@@ -6,7 +6,8 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f0f2f5; padding: 0; margin: 0; max-width: 1400px; margin: auto; }
         h1, h2, h3 { text-align: center; color: #333; }
-        button, input[type="submit"] { cursor: pointer; font-size: 14px; }
+        button, input, select, textarea { font-size: 14px; font-family: inherit; }
+        button, input[type="submit"] { cursor: pointer; }
         hr { border: 0; height: 1px; background: #ddd; margin: 40px 0; }
         
         .top-bar { padding: 10px 30px; background-color: #343a40; color: white; text-align: right; margin-bottom: 20px; }
@@ -16,6 +17,9 @@
         .hidden { display: none; }
 
         .form-container { display: flex; flex-direction: column; max-width: 500px; gap: 15px; margin: 40px auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .form-container input[type="text"], .form-container input[type="color"], .form-container select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 100%; box-sizing: border-box;}
+        .form-container button { background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; }
+
         .site-list .site-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
         .back-to-sites { margin-bottom: 20px; background: none; border: 1px solid #ccc; padding: 8px 15px; border-radius: 4px; }
         
@@ -41,10 +45,11 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
         .modal-content { background-color: #fff; border-radius: 8px; width: 90%; max-width: 700px; padding: 30px; position: relative; }
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
+        
         .modal-form { display: flex; flex-direction: column; gap: 10px; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { text-align: left; margin-bottom: 5px; font-weight: bold; }
-        .form-group input { padding: 8px; }
+        .form-group input, .form-group select { padding: 8px; }
         .link-item-form { display: grid; grid-template-columns: 50px 1fr 2fr; gap: 10px; align-items: center; margin-bottom: 10px; }
     </style>
 </head>
@@ -61,6 +66,14 @@
             <div style="display: flex; align-items: center; gap: 10px;">
                 <label for="theme-color">테마 색상:</label>
                 <input type="color" id="theme-color" value="#121212">
+            </div>
+            <div class="form-group">
+                <label for="title-font">사이트 제목 폰트:</label>
+                <select id="title-font">
+                    <option value="'Noto Sans KR', sans-serif">Noto Sans KR (고딕)</option>
+                    <option value="'Nanum Pen Script', cursive">Nanum Pen Script (손글씨)</option>
+                    <option value="'Black Han Sans', sans-serif">Black Han Sans (굵은)</option>
+                </select>
             </div>
             <button type="submit">사이트 추가</button>
         </form>
@@ -85,33 +98,9 @@
         <hr>
         <div id="link-groups-container"></div>
     </div>
+    <div id="site-edit-modal" class="modal"></div>
 
-    <div id="site-edit-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span><h2>사이트 수정</h2>
-            <form id="site-edit-form-actual" class="modal-form">
-                <input type="hidden" id="edit-site-id">
-                <div class="form-group"><label>사이트 이름:</label><input type="text" id="edit-site-name" required></div>
-                <div class="form-group"><label>사이트 도메인:</label><input type="text" id="edit-site-domain"></div>
-                <div class="form-group"><label>텔레그램 링크:</label><input type="text" id="edit-telegram-link"></div>
-                <div class="form-group"><label>테마 색상:</label><input type="color" id="edit-theme-color"></div>
-                <button type="submit" class="save-btn">수정 완료</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="edit-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span><h2 id="modal-title-banner"></h2>
-            <form id="banner-form-actual" class="modal-form">
-                <input type="hidden" id="slot-id-input">
-                <div class="form-group"><label>연결 주소:</label><input type="text" id="link-url-input" required></div>
-                <div class="form-group"><label>이미지 설명:</label><input type="text" id="alt-text-input" required></div>
-                <div class="form-group"><label>배너 이미지:</label><input type="file" id="image-file-input" accept="image/*"></div>
-                <button type="submit" class="save-btn">저장하기</button>
-            </form>
-        </div>
-    </div>
+    <div id="edit-modal" class="modal"></div>
 
     <div id="link-items-modal" class="modal">
         <div class="modal-content">

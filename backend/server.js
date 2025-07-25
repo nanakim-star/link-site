@@ -47,11 +47,24 @@ const adminApiRouter = express.Router();
 adminApiRouter.use(checkAuth);
 
 // 사이트 관리
-adminApiRouter.get('/sites', async (req, res) => { try { const result = await pool.query('SELECT * FROM sites ORDER BY id ASC'); res.json(result.rows); } catch (e) { res.status(500).json({error: e.message}); } });
-adminApiRouter.post('/sites', async (req, res) => { try { const { site_name, site_domain, theme_color, telegram_link } = req.body; const result = await pool.query('INSERT INTO sites (site_name, site_domain, theme_color, telegram_link) VALUES ($1, $2, $3, $4) RETURNING *', [site_name, site_domain, theme_color, telegram_link]); res.status(201).json(result.rows[0]); } catch (e) { res.status(500).json({error: e.message}); } });
-adminApiRouter.put('/sites/:id', async (req, res) => { try { const { id } = req.params; const { site_name, site_domain, theme_color, telegram_link } = req.body; const result = await pool.query('UPDATE sites SET site_name = $1, site_domain = $2, theme_color = $3, telegram_link = $4 WHERE id = $5 RETURNING *', [site_name, site_domain, theme_color, telegram_link, id]); res.status(200).json(result.rows[0]); } catch (e) { res.status(500).json({ error: e.message, details: e.stack }); } });
+adminApiRouter.get('/sites', async (req, res) => { try { const result = await pool.query('SELECT * FROM sites ORDER BY id ASC'); res.json(result.rows); } catch (e) { console.error("사이트 목록 조회 오류:", e); res.status(500).json({error: e.message}); } });
 
-// 배너 관리
+// --- 이 부분이 수정되었습니다 ---
+adminApiRouter.post('/sites', async (req, res) => { 
+    try { 
+        const { site_name, site_domain, theme_color, telegram_link } = req.body; 
+        const result = await pool.query('INSERT INTO sites (site_name, site_domain, theme_color, telegram_link) VALUES ($1, $2, $3, $4) RETURNING *', [site_name, site_domain, theme_color, telegram_link]); 
+        res.status(201).json(result.rows[0]); 
+    } catch (e) { 
+        console.error("사이트 추가 오류:", e); 
+        res.status(500).json({error: e.message, details: e.stack}); // 에러 내용을 브라우저로 전송
+    } 
+});
+// --- 여기까지 ---
+
+adminApiRouter.put('/sites/:id', async (req, res) => { try { const { id } = req.params; const { site_name, site_domain, theme_color, telegram_link } = req.body; const result = await pool.query('UPDATE sites SET site_name = $1, site_domain = $2, theme_color = $3, telegram_link = $4 WHERE id = $5 RETURNING *', [site_name, site_domain, theme_color, telegram_link, id]); res.status(200).json(result.rows[0]); } catch (e) { console.error("사이트 수정 오류:", e); res.status(500).json({ error: e.message, details: e.stack }); } });
+
+// 배너 관리 (이하 동일)
 adminApiRouter.get('/sites/:siteId/banners', async (req, res) => { try { const { siteId } = req.params; const result = await pool.query('SELECT * FROM link_site_banners WHERE site_id = $1', [siteId]); const banners = Array(20).fill(null); result.rows.forEach(row => { banners[row.slot_id - 1] = row; }); res.json(banners); } catch (e) { res.status(500).json({error: e.message}); } });
 adminApiRouter.post('/sites/:siteId/banners/:slotId', upload.single('bannerImage'), async (req, res) => { try { const { siteId, slotId } = req.params; const { link_url, alt_text } = req.body; let image_url; if(req.file){image_url = `/images/${req.file.filename}`;} const existing = await pool.query('SELECT * FROM link_site_banners WHERE site_id = $1 AND slot_id = $2', [siteId, slotId]); if (existing.rows.length > 0) { if (image_url) { const oldImagePath = path.join(__dirname, '../frontend', existing.rows[0].image_url); if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath); await pool.query('UPDATE link_site_banners SET link_url = $1, image_url = $2, alt_text = $3 WHERE site_id = $4 AND slot_id = $5', [link_url, image_url, alt_text, siteId, slotId]); } else { await pool.query('UPDATE link_site_banners SET link_url = $1, alt_text = $2 WHERE site_id = $3 AND slot_id = $4', [link_url, alt_text, siteId, slotId]); } } else { if (!image_url) {return res.status(400).json({error: "새로 등록할 때는 이미지 파일이 필요합니다."});} await pool.query('INSERT INTO link_site_banners (site_id, slot_id, link_url, image_url, alt_text) VALUES ($1, $2, $3, $4, $5)', [siteId, slotId, link_url, image_url, alt_text]); } res.status(201).json({ message: '성공' }); } catch (e) { res.status(500).json({error: e.message}); } });
 adminApiRouter.delete('/sites/:siteId/banners/:slotId', async (req, res) => { try { const { siteId, slotId } = req.params; const result = await pool.query('DELETE FROM link_site_banners WHERE site_id = $1 AND slot_id = $2 RETURNING *', [siteId, slotId]); if (result.rows.length > 0) { const imagePath = path.join(__dirname, '../frontend', result.rows[0].image_url); if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath); } res.status(200).json({ message: '삭제 완료' }); } catch (e) { res.status(500).json({error: e.message}); } });
@@ -70,43 +83,10 @@ app.get('/api/public/sites/:siteId/link_lists', async (req, res) => { try { cons
 app.listen(port, async () => {
     console.log(`서버가 http://localhost:${port} 에서 실행 중입니다.`);
     try {
-        await pool.query(`
-          CREATE TABLE IF NOT EXISTS sites (
-            id SERIAL PRIMARY KEY,
-            site_name VARCHAR(255) NOT NULL,
-            site_domain VARCHAR(255),
-            theme_color VARCHAR(7) DEFAULT '#121212',
-            telegram_link TEXT
-          );
-        `);
-        await pool.query(`
-          CREATE TABLE IF NOT EXISTS link_site_banners (
-            id SERIAL PRIMARY KEY,
-            site_id INT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
-            slot_id INT NOT NULL,
-            link_url TEXT NOT NULL,
-            image_url TEXT NOT NULL,
-            alt_text VARCHAR(255),
-            UNIQUE (site_id, slot_id)
-          );
-        `);
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS link_groups (
-                id SERIAL PRIMARY KEY,
-                site_id INT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
-                title VARCHAR(255) NOT NULL,
-                display_order INT DEFAULT 0
-            );
-        `);
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS link_items (
-                id SERIAL PRIMARY KEY,
-                group_id INT NOT NULL REFERENCES link_groups(id) ON DELETE CASCADE,
-                rank INT DEFAULT 0,
-                name VARCHAR(255) NOT NULL,
-                url TEXT NOT NULL
-            );
-        `);
+        await pool.query(`CREATE TABLE IF NOT EXISTS sites (id SERIAL PRIMARY KEY, site_name VARCHAR(255) NOT NULL, site_domain VARCHAR(255), theme_color VARCHAR(7) DEFAULT '#121212', telegram_link TEXT, title_font VARCHAR(255) DEFAULT '''Noto Sans KR'', sans-serif');`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS link_site_banners (id SERIAL PRIMARY KEY, site_id INT NOT NULL REFERENCES sites(id) ON DELETE CASCADE, slot_id INT NOT NULL, link_url TEXT NOT NULL, image_url TEXT NOT NULL, alt_text VARCHAR(255), UNIQUE (site_id, slot_id));`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS link_groups (id SERIAL PRIMARY KEY, site_id INT NOT NULL REFERENCES sites(id) ON DELETE CASCADE, title VARCHAR(255) NOT NULL, display_order INT DEFAULT 0);`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS link_items (id SERIAL PRIMARY KEY, group_id INT NOT NULL REFERENCES link_groups(id) ON DELETE CASCADE, rank INT DEFAULT 0, name VARCHAR(255) NOT NULL, url TEXT NOT NULL);`);
         console.log("테이블들이 준비되었습니다.");
     } catch (error) {
         console.error('테이블 생성 중 오류 발생:', error);
